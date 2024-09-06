@@ -123,6 +123,74 @@ RegisterNetEvent('qb-dynamicjobs_billing:server:sendBilling', function(data)
     end
 end)
 
+
+-- Server-side billing event
+RegisterNetEvent('qb-dynamicjobs_billing:server:sendBilling', function(data)
+    local src = source
+    local currentPlayer = QBCore.Functions.GetPlayer(src)
+
+    -- Validate input data
+    if not data or not data.citizenid or not data.amount then
+        TriggerClientEvent('QBCore:Notify', src, 'Invalid billing data.', 'error')
+        return
+    end
+
+    local amount = tonumber(data.amount)
+    local citizenid = data.citizenid
+    local billedPlayer = QBCore.Functions.GetPlayerByCitizenId(citizenid)
+
+    if billedPlayer then
+        -- Send billing details to the customer for confirmation
+        TriggerClientEvent('qb-dynamicjobs_billing:client:sendBilling', billedPlayer.PlayerData.source, amount, currentPlayer.PlayerData.charinfo.firstname, citizenid)
+    else
+        TriggerClientEvent('QBCore:Notify', src, 'Citizen not found.', 'error')
+    end
+end)
+
+
+RegisterNetEvent('qb-dynamicjobs_billing:server:doneBilling', function(data)
+    local src = source
+    local currentPlayer = QBCore.Functions.GetPlayer(src)
+
+    -- Validate input data
+    if not data or not data.amount or not data.cid or not data.payment_method then
+        TriggerClientEvent('QBCore:Notify', src, 'Payment failed: Invalid data.', 'error')
+        return
+    end
+
+    local amount = tonumber(data.amount)
+    local paymentMethod = data.payment_method
+    local paidPlayer = QBCore.Functions.GetPlayerByCitizenId(data.cid)
+
+    if currentPlayer and paidPlayer then
+        local jobName = currentPlayer.PlayerData.job.name
+
+        -- Determine the payment method and update the account balance
+        if paymentMethod == "cash" then
+            if currentPlayer.Functions.RemoveMoney("cash", amount, "qb-dynamicjobs_billing-paid") then
+                -- Update society account balance
+                exports['qb-banking']:AddMoney(jobName, amount, 'Payment received')
+                TriggerClientEvent("QBCore:Notify", src, "Payment successful. Cash received by society account.", "success")
+            else
+                TriggerClientEvent("QBCore:Notify", src, "Insufficient cash.", "error")
+            end
+        elseif paymentMethod == "bank" then
+            if currentPlayer.Functions.RemoveMoney("bank", amount, "qb-dynamicjobs_billing-paid") then
+                -- Update society account balance
+                exports['qb-banking']:AddMoney(jobName, amount, 'Payment received')
+                TriggerClientEvent("QBCore:Notify", src, "Payment successful. Bank transfer received by society account.", "success")
+            else
+                TriggerClientEvent("QBCore:Notify", src, "Insufficient bank funds.", "error")
+            end
+        end
+    else
+        TriggerClientEvent('QBCore:Notify', src, "Payment failed: Player not found.", 'error')
+    end
+end)
+
+
+
+--[[
 RegisterNetEvent('qb-dynamicjobs_billing:server:doneBilling', function(data)
     local src = source
     local currentPlayer = QBCore.Functions.GetPlayer(src)
@@ -165,6 +233,8 @@ RegisterNetEvent('qb-dynamicjobs_billing:server:doneBilling', function(data)
         TriggerClientEvent('QBCore:Notify', src, "Payment failed: Player not found.", 'error')
     end
 end)
+]]
+
 
 ------ MORE STORAGE
 
@@ -172,7 +242,7 @@ end)
 RegisterNetEvent('bd-burgershot:server:bbackStorage', function(bbackStorage)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local stashName = 'Burger Storage'
+    local stashName = 'Dynamic Storage'
 
     if Player then
         exports['qb-inventory']:OpenInventory(src, stashName, {

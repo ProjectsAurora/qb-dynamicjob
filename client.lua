@@ -23,13 +23,25 @@ Citizen.CreateThread(function()
                     event = "qb-dynamicjobs:openCraftingMenu",
                     icon = "fas fa-hammer",
                     label = location.targetLabel or "Unknown Location",
-                    locationName = locationName
+                    job = location.job, -- Add job requirement
+                    locationName = locationName,
                 }
             },
             distance = 2.5
         })
     end
 end)
+
+-- Event to open crafting menu and pass recipes
+RegisterNetEvent("qb-dynamicjobs:openCraftingMenu")
+AddEventHandler("qb-dynamicjobs:openCraftingMenu", function(data)
+    local locationName = data.locationName
+    local recipes = data.recipes
+
+    -- Trigger crafting menu logic with recipes for this location
+    TriggerEvent('qb-dynamicjobs:client:OpenCraftingMenu', locationName, recipes)
+end)
+
 
 -- Event to open the crafting menu
 RegisterNetEvent('qb-dynamicjobs:openCraftingMenu', function(data)
@@ -59,7 +71,7 @@ RegisterNetEvent('qb-dynamicjobs:openCraftingMenu', function(data)
             end
 
             table.insert(menuOptions, {
-                header = recipe.label .. " - $" .. recipe.price,
+                header = recipe.label, -- No price included
                 icon = "fas fa-cogs",
                 txt = requirements,
                 params = {
@@ -76,15 +88,17 @@ RegisterNetEvent('qb-dynamicjobs:openCraftingMenu', function(data)
         end
     end
 
-    -- Open the crafting menu
+    -- Open the crafting menu with an icon in the header
     exports['qb-menu']:openMenu({
         {
             header = "Crafting Menu - " .. targetLabel,
+            icon = "fas fa-tools", -- Add your desired icon here (example: "fas fa-tools")
             isMenuHeader = true
         },
         table.unpack(menuOptions)
     })
 end)
+
 
 -- Event to start crafting
 RegisterNetEvent('qb-dynamicjobs:startCrafting', function(data)
@@ -138,38 +152,6 @@ RegisterNetEvent('qb-dynamicjobs:startCraftingClient', function(data)
     })
 end)
 
-
-
-
----Work Storage Per job set in config 
-Citizen.CreateThread(function()
-    if Config and Config.StorageLocation then
-        exports['qb-target']:AddBoxZone(Config.StorageLocation.name, Config.StorageLocation.coords, Config.StorageLocation.size.x, Config.StorageLocation.size.y, {
-            name = Config.StorageLocation.name,
-            heading = Config.StorageLocation.heading,
-            debugPoly = false,
-            minZ = Config.StorageLocation.minZ,
-            maxZ = Config.StorageLocation.maxZ,
-        }, {
-            options = {
-                {
-                    type = "client",
-                    event = "qb-dynamicjobs:client:bjobFridge",
-                    icon = "fa-solid fa-box",
-                    label = "Storage",
-                }
-            },
-            distance = 2.5
-        })
-    else
-        print("Error: Config or Config.StorageLocation is nil.")
-    end
-end)
-
-RegisterNetEvent("qb-dynamicjobs:client:bjobFridge")
-AddEventHandler("qb-dynamicjobs:client:bjobFridge", function()
-    TriggerServerEvent('qb-dynamicjobs:server:bjobFridge')
-end)
 
 
 -- Register each location from the config
@@ -293,7 +275,7 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:sendBilling', function(amount, n
             TriggerEvent('QBCore:Notify', "Invalid payment details.", "error")
         end
     else
-        TriggerEvent('QBCore:Notify', "Billing action canceled.", "error")
+   --     TriggerEvent('QBCore:Notify', "Billing action canceled.", "error")
     end
 end)
 
@@ -317,27 +299,65 @@ RegisterNetEvent('qb-dynamicjobs:client:ToggleDuty', function()
     TriggerServerEvent("QBCore:ToggleDuty")
 end)
 
-exports['qb-target']:AddBoxZone("BurgerShotBackStorage", vector3(-1197.5, -893.86, 14.48), 0.9, 0.9, { ---- More STORAGE LOCATION
-    name = "BurgerShotBackStorage",
-    heading = 347.27,
-    debugPoly = false,
-    minZ = 14.0 - 2,
-    maxZ = 14.0 + 2,
-}, {
-    options = {
-        {
-            type = "client",
-            event = "bd-burgershot:client:bbackStorage",
-            icon = "fa-solid fa-equals",
-            label = "Back Storage",
-            job = "dynamic",
-        },
-    },
-    distance = 2.5
-})
+----P
+Citizen.CreateThread(function()
+    if Config and Config.OpenStorage then
+        local storage = Config.OpenStorage.BackStorage
+        exports['qb-target']:AddBoxZone(storage.name, storage.coords, storage.size.x, storage.size.y, {
+            name = storage.name,
+            heading = storage.heading,
+            debugPoly = false,
+            minZ = storage.minZ,
+            maxZ = storage.maxZ,
+        }, {
+            options = {
+                {
+                    type = "client",
+                    event = "bd-burgershot:client:bbackStorage",
+                    icon = "fa-solid fa-equals",
+                    label = "Tray",
+                    job = storage.job,
+                },
+            },
+            distance = 3.
+        })
+    else
+        print("Error: Config or Config.OpenStorage is nil.")
+    end
+end)
 
 RegisterNetEvent("bd-burgershot:client:bbackStorage", function()
     TriggerServerEvent('bd-burgershot:server:bbackStorage')
 end)
 
+---Work Storage Per job set in config 
+Citizen.CreateThread(function()
+    if Config and Config.StorageLocation then
+        exports['qb-target']:AddBoxZone(Config.StorageLocation.name, Config.StorageLocation.coords, Config.StorageLocation.size.x, Config.StorageLocation.size.y, {
+            name = Config.StorageLocation.name,
+            heading = Config.StorageLocation.heading,
+            debugPoly = false,
+            minZ = Config.StorageLocation.minZ,
+            maxZ = Config.StorageLocation.maxZ,
+        }, {
+            options = {
+                {
+                    type = "client",
+                    event = "qb-dynamicjobs:client:bjobFridge",
+                    icon = "fa-solid fa-box",
+                    label = "Storage",
+                    job = Config.StorageLocation.job -- Job requirement from config
+                }
+            },
+            distance = 2.5
+        })
+    else
+        print("Error: Config or Config.StorageLocation is nil.")
+    end
+end)
 
+
+RegisterNetEvent("qb-dynamicjobs:client:bjobFridge")
+AddEventHandler("qb-dynamicjobs:client:bjobFridge", function()
+    TriggerServerEvent('qb-dynamicjobs:server:bjobFridge')
+end)
