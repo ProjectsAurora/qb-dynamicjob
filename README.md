@@ -2,6 +2,8 @@
 
 **qb-dynamicjobs** is a versatile script for QBCore that allows server administrators and players to fine-tune and create custom jobs with ease through configuration files. This script eliminates the need for multiple job scripts by providing a single, highly customizable solution.
 
+For questions or support, https://discord.gg/DrEVzXz5Gh
+
 ## Features
 
 - **Fridges and Storage:** Includes three storage options—one public and two job-specific storages. While the storage is limited to three, you can add unlimited crafting locations, clock-in points, and tills.
@@ -45,4 +47,4 @@ The script is currently in the testing phase with ongoing bug fixes. We are shar
 
 ## Contact
 
-For questions or support, https://discord.gg/DrEVzXz5Gh
+
