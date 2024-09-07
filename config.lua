@@ -175,9 +175,9 @@ Config.Recipes = {
     ["bs_rimjob"] = {
         label = "RimJob Doughnut",
         price = 18,
-        craftingTime = 18, -- Time in seconds
+        craftingTime = 25, -- Time in seconds
         ingredients = {
-            {name = "flour", amount = 2},
+            {name = "flour", amount = 1},
             {name = "sugar", amount = 1}
         }
     }

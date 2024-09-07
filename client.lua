@@ -99,7 +99,6 @@ RegisterNetEvent('qb-dynamicjobs:openCraftingMenu', function(data)
     })
 end)
 
-
 -- Event to start crafting
 RegisterNetEvent('qb-dynamicjobs:startCrafting', function(data)
     local itemName = data.itemName
@@ -138,18 +137,51 @@ RegisterNetEvent('qb-dynamicjobs:startCraftingClient', function(data)
         duration = craftingTime * 1000,
         label = "Crafting...",
         useWhileDead = false,
-        canCancel = true,
+        canCancel = false,  -- Disable cancellation
         controlDisables = {
             disableMovement = true,
             disableCarMovement = false,
             disableMouse = false,
             disableCombat = true,
         },
-        onCancel = function()
-            -- Cancel crafting
-            TriggerServerEvent('qb-dynamicjobs:cancelCrafting')
-        end
+        -- No onCancel function since we are preventing cancellation
     })
+end)
+
+
+
+-- Event to handle crafting cancellation
+RegisterNetEvent('qb-dynamicjobs:cancelCrafting', function()
+    -- Ensure the progress bar is stopped
+    exports['progressbar']:Stop("crafting")
+
+    -- Stop any ongoing animation
+    local playerPed = PlayerPedId()
+    ClearPedTasksImmediately(playerPed)
+    print("Crafting canceled and animation stopped") -- Debugging
+end)
+
+
+-- Event to handle crafting cancellation
+RegisterNetEvent('qb-dynamicjobs:cancelCrafting', function()
+    -- Ensure the progress bar is stopped
+    exports['progressbar']:Stop("crafting")
+
+    -- Stop any ongoing animation
+    local playerPed = PlayerPedId()
+    ClearPedTasksImmediately(playerPed)
+    print("Crafting canceled and animation stopped") -- Debugging
+end)
+
+
+-- Event to handle crafting cancellation
+RegisterNetEvent('qb-dynamicjobs:cancelCrafting', function()
+    -- Ensure the progress bar is hidden
+    exports['progressbar']:Stop("crafting")
+
+    -- Stop any ongoing animation
+    local playerPed = PlayerPedId()
+    ClearPedTasksImmediately(playerPed)
 end)
 
 
@@ -182,6 +214,7 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:OpenBillingMenu', function()
         {
             header = "Billing Menu",
             txt = "Charge a customer",
+            icon = "fas fa-dollar-sign",  -- Add dollar sign icon here
             params = {
                 event = "qb-dynamicjobs_billing:client:ChargeCustomer"
             }
@@ -190,6 +223,7 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:OpenBillingMenu', function()
     -- Trigger the menu
     TriggerEvent('qb-menu:client:openMenu', menuOptions)
 end)
+
 
 -- Input details for billing (Citizen ID and Amount)
 RegisterNetEvent('qb-dynamicjobs_billing:client:ChargeCustomer', function()
@@ -232,6 +266,7 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:ChargeCustomer', function()
     end
 end)
 
+
 -- Handling billing information from the server
 RegisterNetEvent('qb-dynamicjobs_billing:client:sendBilling', function(amount, name, citizenId)
     -- Show a confirmation prompt to the user
@@ -240,12 +275,10 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:sendBilling', function(amount, n
         submitText = "Pay",
         inputs = {
             {
-                text = "Amount",
-                name = "amount",
-                type = "text",  -- Use text type to make it non-editable
-                isRequired = true,
-                default = tostring(amount),  -- Show the static amount
-                -- Add styling here if possible to indicate it's not editable
+                text = "Amount: $" .. tostring(amount),  -- Display amount as static text (not editable)
+                name = "amount_label",  -- This is a label, not an input
+                type = "label",  -- Use a type like "label" to indicate static content
+                isRequired = false  -- No input required since it's just for display
             },
             {
                 text = "Payment Method",
@@ -261,13 +294,12 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:sendBilling', function(amount, n
     })
 
     if input then
-        local payAmount = tonumber(input.amount)
         local paymentMethod = input.payment_method
 
-        if payAmount and payAmount == amount and (paymentMethod == "cash" or paymentMethod == "bank") then
-            -- Trigger server event to handle the payment
+        if paymentMethod then
+            -- Proceed with billing process
             TriggerServerEvent('qb-dynamicjobs_billing:server:doneBilling', {
-                amount = payAmount,
+                amount = amount,  -- Use the amount from the server (not editable by client)
                 cid = citizenId,
                 payment_method = paymentMethod
             })
@@ -275,9 +307,11 @@ RegisterNetEvent('qb-dynamicjobs_billing:client:sendBilling', function(amount, n
             TriggerEvent('QBCore:Notify', "Invalid payment details.", "error")
         end
     else
-   --     TriggerEvent('QBCore:Notify', "Billing action canceled.", "error")
+    --    TriggerEvent('QBCore:Notify', "Billing action canceled.", "error")
     end
 end)
+
+
 
 -- Register each BusinessClock location from the config
 for location, details in pairs(Config.BusinessClockLocations) do
