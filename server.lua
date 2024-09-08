@@ -1,73 +1,6 @@
---[[
 local QBCore = exports['qb-core']:GetCoreObject()
 
--- Event to check ingredients and start crafting
-RegisterNetEvent('qb-dynamicjobs:checkIngredientsAndStartCrafting', function(itemName, locationName, craftingTime)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local location = Config.JobLocations[locationName]
-    local recipe = Config.Recipes[itemName]
 
-    if not location or not recipe then
-        print("Error: Invalid location or recipe.")
-        return
-    end
-
-    -- Check if the player has the required ingredients
-    local hasIngredients = true
-    for _, ingredient in ipairs(recipe.ingredients) do
-        local item = Player.Functions.GetItemByName(ingredient.name)
-        if not item or item.amount < ingredient.amount then
-            hasIngredients = false
-            break
-        end
-    end
-
-    if not hasIngredients then
-        TriggerClientEvent('QBCore:Notify', src, "You don't have the required ingredients.", "error")
-        return
-    end
-
-    -- Notify player that crafting has started
-    TriggerClientEvent('QBCore:Notify', src, "Crafting started. Please wait...", "info")
-
-    -- Notify client to start the progress bar and animation
-    TriggerClientEvent('qb-dynamicjobs:startCraftingClient', src, {
-        itemName = itemName,
-        craftingTime = craftingTime
-    })
-
-    -- Start crafting process
-    Citizen.CreateThread(function()
-        Citizen.Wait(craftingTime * 1000)
-
-        -- Remove ingredients
-        for _, ingredient in ipairs(recipe.ingredients) do
-            Player.Functions.RemoveItem(ingredient.name, ingredient.amount)
-        end
-
-        -- Add crafted item
-        Player.Functions.AddItem(itemName, 1)
-
-        -- Notify player
-        TriggerClientEvent('QBCore:Notify', src, "Crafting complete! You received 1x " .. recipe.label, "success")
-    end)
-end)
-
-
-
-
--- Event to handle crafting cancellation
-RegisterNetEvent('qb-dynamicjobs:cancelCrafting', function()
-    local src = source
-    -- Notify client that crafting was canceled
-    TriggerClientEvent('QBCore:Notify', src, "Crafting canceled.", "error")
-    -- Additional logic to handle cancellation (if needed)
-end)
-]]
-local QBCore = exports['qb-core']:GetCoreObject()
-
--- Initialize craftingProcesses as an empty table
 local craftingProcesses = {}
 
 -- Event to check ingredients and start crafting
@@ -200,8 +133,6 @@ RegisterNetEvent('qb-dynamicjobs:server:bjobFridge2', function(bjobFridge)
 end)
 
 
-
-
 RegisterNetEvent('qb-dynamicjobs_billing:server:sendBilling', function(data)
     local src = source
 
@@ -309,56 +240,8 @@ end)
 
 
 
---[[
-RegisterNetEvent('qb-dynamicjobs_billing:server:doneBilling', function(data)
-    local src = source
-    local currentPlayer = QBCore.Functions.GetPlayer(src)
 
-    -- Validate input data
-    if not data or not data.amount or not data.cid or not data.payment_method then
-        TriggerClientEvent('QBCore:Notify', src, 'Payment failed: Invalid data.', 'error')
-        return
-    end
-
-    local amount = tonumber(data.amount)
-    local paymentMethod = data.payment_method
-    local paidPlayer = QBCore.Functions.GetPlayerByCitizenId(data.cid)
-
-    if currentPlayer and paidPlayer then
-        local cash = currentPlayer.PlayerData.money["cash"]
-        local bank = currentPlayer.PlayerData.money["bank"]
-        local currentPlayerFirstName = currentPlayer.PlayerData.charinfo.firstname
-
-        if paymentMethod == "cash" then
-            if cash >= amount then
-                currentPlayer.Functions.RemoveMoney("cash", amount, "qb-dynamicjobs_billing-paid")
-                paidPlayer.Functions.AddMoney("cash", amount, "qb-dynamicjobs_billing-received")
-                TriggerClientEvent("QBCore:Notify", paidPlayer.PlayerData.source, "You received $" .. amount .. " from " .. currentPlayerFirstName .. " in cash!", "success")
-                TriggerClientEvent("QBCore:Notify", src, "Payment successful.", "success")
-            else
-                TriggerClientEvent("QBCore:Notify", src, "Insufficient cash.", "error")
-            end
-        elseif paymentMethod == "bank" then
-            if bank >= amount then
-                currentPlayer.Functions.RemoveMoney("bank", amount, "qb-dynamicjobs_billing-paid")
-                paidPlayer.Functions.AddMoney("bank", amount, "qb-dynamicjobs_billing-received")
-                TriggerClientEvent("QBCore:Notify", paidPlayer.PlayerData.source, "You received $" .. amount .. " from " .. currentPlayerFirstName .. " via bank transfer!", "success")
-                TriggerClientEvent("QBCore:Notify", src, "Payment successful.", "success")
-            else
-                TriggerClientEvent("QBCore:Notify", src, "Insufficient bank funds.", "error")
-            end
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, "Payment failed: Player not found.", 'error')
-    end
-end)
-]]
-
-
------- MORE STORAGE
-
-
-RegisterNetEvent('bd-burgershot:server:bbackStorage', function(bbackStorage)
+RegisterNetEvent('qb-dynamicjobs:server:bbackStorage', function(bbackStorage)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local stashName = 'Dynamic Storage'

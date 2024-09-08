@@ -138,7 +138,7 @@ Config.Recipes = {
     ["bs_creampie"] = {
         label = "Apple Creampie",
         price = 5,
-        craftingTime = 15, -- Time in seconds
+        craftingTime = 15, -- Time in seconds recommend not doing this for too long I am working ont he animation loops
         ingredients = {
             {name = "sugar", amount = 1},
             {name = "eggs", amount = 1}

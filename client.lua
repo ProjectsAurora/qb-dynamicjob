@@ -144,7 +144,7 @@ RegisterNetEvent('qb-dynamicjobs:startCraftingClient', function(data)
             disableMouse = false,
             disableCombat = true,
         },
-        -- No onCancel function since we are preventing cancellation
+
     })
 end)
 
@@ -347,7 +347,7 @@ Citizen.CreateThread(function()
             options = {
                 {
                     type = "client",
-                    event = "bd-burgershot:client:bbackStorage",
+                    event = "qb-dynamicjobs:client:bbackStorage",
                     icon = "fa-solid fa-equals",
                     label = "Tray",
                     job = storage.job,
@@ -360,8 +360,8 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterNetEvent("bd-burgershot:client:bbackStorage", function()
-    TriggerServerEvent('bd-burgershot:server:bbackStorage')
+RegisterNetEvent("qb-dynamicjobs:client:bbackStorage", function()
+    TriggerServerEvent('qb-dynamicjobs:server:bbackStorage')
 end)
 
 ---Work Storage Per job set in config 
