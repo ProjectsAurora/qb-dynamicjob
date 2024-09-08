@@ -5,6 +5,8 @@
 For questions or support, https://discord.gg/DrEVzXz5Gh
 
 
+# QBCore Dynamic Jobs Script
+
 A dynamic, job-based system for **QBCore Framework** that allows you to create custom crafting, billing, and storage locations specific to each job. The script is highly flexible, offering full customization of locations, job grades, and interactions. Perfect for any job or business type on your server.
 
 ## Features
@@ -56,7 +58,7 @@ This will easily update all relevant events in **client.lua**, **server.lua**, a
 
 Open the **config.lua** file and modify job-specific details such as crafting locations, job requirements, and recipes:
 
-
+```lua
 Config.JobLocations = {
     ["electronics_crafting"] = {
         coords = vector3(100.0, -200.0, 20.0),
@@ -66,5 +68,19 @@ Config.JobLocations = {
         recipes = {"circuitboard", "battery"}
     }
 }
-### Step 3: Update Config for the New Job
+
 ensure qb-dynamicjobs-electronics
+
+### Step 4: Add to `server.cfg`
+
+Finally, add the new script to your **server.cfg** file:
+
+```plaintext
+ensure qb-dynamicjobs-electronics
+
+
+1. **Clone the repository** and duplicate the script for each job you want.
+2. Use **Visual Studio Code** to quickly replace event names using **"Find and Replace"**.
+3. Modify the **config.lua** file to customize the job locations, recipes, and job grades.
+4. Add the script to your **server.cfg**.
+
