@@ -59,7 +59,7 @@ This will easily update all relevant events in **client.lua**, **server.lua**, a
 
 Open the **config.lua** file and modify job-specific details such as crafting locations, job requirements, and recipes:
 
-```lua
+
 Config.JobLocations = {
     ["electronics_crafting"] = {
         coords = vector3(100.0, -200.0, 20.0),
