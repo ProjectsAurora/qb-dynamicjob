@@ -4,6 +4,7 @@
 
 For questions or support, https://discord.gg/DrEVzXz5Gh
 
+This script works hand in hand with my script QB-Grocery https://github.com/ProjectsAurora/qb-grocery
 
 # QBCore Dynamic Jobs Script
 
